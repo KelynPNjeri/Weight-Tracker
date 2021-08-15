@@ -13,17 +13,14 @@ import (
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "this is the startup error: %s\\n", err)
+		fmt.Fprintf(os.Stderr, "Startup error: %s\n", err)
 		os.Exit(1)
 	}
 }
 
-// func run will be responsible for setting up db connections, routers etc
+// func run will be responsible for setting up db connections, routers
 func run() error {
-	// I'm used to working with postgres, but feel free to use any db you like. You just have to change the driver
-	// I'm not going to cover how to create a database here but create a database
-	// and call it something along the lines of "weight tracker"
-	connectionString := "postgres://postgres:postgres@localhost/weight-tracker?sslmode=disable"
+	connectionString := "postgres://alchemist:Kelyn@1998@localhost/weight_tracker?sslmode=disable"
 
 	// setup database connection
 	db, err := setupDatabase(connectionString)
@@ -34,6 +31,12 @@ func run() error {
 
 	// create storage dependency
 	storage := repository.NewStorage(db)
+
+	err = storage.RunMigrations(connectionString)
+
+	if err != nil {
+		return err
+	}
 
 	// create router dependecy
 	router := gin.Default()
